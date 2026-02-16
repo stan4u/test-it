@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,10 +34,15 @@ class TaskControllerTest {
 
     private Long userId;
 
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
     @BeforeEach
     void setUp() {
         // Créer un utilisateur de test en DB
-        User user = new User("testuser");
+        User user = new User("pingoo");
+        user.setPassword(passwordEncoder.encode("1234"));
+        user.setRole("admin");
         userRepository.save(user);
         userId = user.getId();
         // Set current user for auth
@@ -45,7 +51,7 @@ class TaskControllerTest {
 
     @Test
     void getAllTasks_shouldReturnEmptyList_initially() throws Exception {
-        mockMvc.perform(get("/tasks"))
+        mockMvc.perform(get("/tasks").header("Authorization", "Basic cGluZ29vOjEyMzQ="))
                 .andExpect(status().isOk())
                 .andExpect(content().json("[]"));
     }
@@ -59,7 +65,7 @@ class TaskControllerTest {
             }
             """;
 
-        mockMvc.perform(post("/tasks")
+        mockMvc.perform(post("/tasks").header("Authorization", "Basic cGluZ29vOjEyMzQ=")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(taskJson))
                 .andExpect(status().isOk())
@@ -69,7 +75,7 @@ class TaskControllerTest {
 
     @Test
     void getTasksByUser_shouldReturnUserTasks() throws Exception {
-        mockMvc.perform(get("/tasks/user/{userId}", userId))
+        mockMvc.perform(get("/tasks/user/{userId}", userId).header("Authorization", "Basic cGluZ29vOjEyMzQ="))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }

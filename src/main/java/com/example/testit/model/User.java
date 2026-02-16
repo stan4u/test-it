@@ -12,6 +12,9 @@ public class User {
     private Long id;
 
     private String username;
+    private String role ;
+    private String password;
+
 
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,4 +37,10 @@ public class User {
 
     public User getManager() { return manager; }
     public void setManager(User manager) { this.manager = manager; }
+
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }
